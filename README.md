@@ -3,14 +3,20 @@ Powerline SVN Status
 
 A [Powerline](https://github.com/powerline/powerline) segment for showing the status of a [Subversion](https://subversion.apache.org/) working directory. Inspired by Jasper N. Brouwer's [Powerline Gitstatus](https://github.com/jaspernbrouwer/powerline-gitstatus) segment.
 
-It includes a segment for the Subversion trunk/branch/tag you're working on, as well as individual segments that summarize the status of your current working directory. For example, if you have a clean working copy, you'll just see a segment with the trunk/branch/tag name as its text; if you create a new untracked file, you'll see an additional segment with the text `? 1` (signifying 1 untracked file); if you stage that file for addition, you'll see a different segment in its place with the text `A 1` (signifying 1 added file).
-
 ![screenshot](https://github.com/justinludwig/powerline-svnstatus/blob/master/screenshot.png)
+
+It includes a segment for the Subversion trunk/branch/tag you're working on, as well as individual segments that summarize the status of your current working directory. For example, if you have a clean working copy, you'll just see a segment with the trunk/branch/tag name as its text; if you create a new untracked file, you'll see an additional segment with the text `? 1` (signifying 1 untracked file); if you stage that file for addition, you'll see a different segment in its place with the text `A 1` (signifying 1 added file).
 
 Installation
 ------------
 
-Install Powerline and this segment (say via Pip), then add the `powerline_status.svnstatus` segment to your Powerline configuration; this is what I use in my `~/.config/powerline/themes/shell/default_leftonly.json`:
+Once you have Powerline set up and running, you can install this segment via Pip:
+
+```
+pip install powerline-svnstatus
+```
+
+Then add the `powerline_status.svnstatus` segment to your Powerline configuration; this is what I use in my `~/.config/powerline/themes/shell/default_leftonly.json`:
 
 ```json
             {
@@ -22,7 +28,7 @@ Install Powerline and this segment (say via Pip), then add the `powerline_status
 Configuration
 -------------
 
-You can adjust what this segment displays as its "branch". By default, it runs the following regular expression against the URL returned by the `svn info` command, and concatenates the matching groups from the regular expression: `/(trunk)(?:/|$)|/(?:tags|branch(?:es)?)/([^/]+)`. So for example, if the URL of your working copy was `https://repo.example.com/svn/foo/trunk`, it would display `trunk` as the "branch"; if the URL was `https://repo.example.com/svn/foo/branches/xyz`, it would display `xyz` as the "branch".
+You can adjust what this segment displays for a "branch". By default, it runs the following regular expression against the URL returned by the `svn info` command, and concatenates the matching groups from the regular expression: `/(trunk)(?:/|$)|/(?:tags|branch(?:es)?)/([^/]+)`. So for example, if the URL of your working copy was `https://repo.example.com/svn/foo/trunk`, it would display `trunk` as the "branch"; if the URL was `https://repo.example.com/svn/foo/branches/xyz`, it would display `xyz` as the "branch".
 
 You can use the `branch_re` argument in this segment's configuration to customize the branch regular expression. So for example, if you wanted to also show the "project" that the branch was a part of (so as to show `foo/trunk` for an URL like `https://repo.example.com/svn/foo/trunk`, or `foo/1.2.3` for an URL like `https://repo.example.com/svn/foo/tags/1.2.3`), you could adjust your segment configuration to this:
 

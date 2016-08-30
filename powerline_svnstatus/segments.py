@@ -45,7 +45,7 @@ class SvnStatusSegment(Segment):
         cwd = segment_info['getcwd']()
         if not cwd: return ''
 
-        proc = Popen(['svn', 'status', cwd], stdout=PIPE, stderr=PIPE)
+        proc = Popen(['svn', 'status', '--ignore-externals', cwd], stdout=PIPE, stderr=PIPE)
         out, err = [item.decode('utf-8') for item in proc.communicate()]
         return out.splitlines(), err.splitlines()
 
@@ -63,7 +63,7 @@ class SvnStatusSegment(Segment):
     '''
     def build_status_segment(self, pair):
         specific_group = 'svnstatus_%s' % pair[0]
-        general_group = 'svnstatus_%s' % pair[0][0] if pair else 'svnstatus_'
+        general_group = 'svnstatus_%s' % pair[0][0] if pair[0] else 'svnstatus_'
         return {
             'contents': '%s %d' % (pair[0], pair[1]),
             'highlight_groups': [

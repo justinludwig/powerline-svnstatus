@@ -19,7 +19,7 @@ class SvnStatusSegment(Segment):
         cwd = segment_info['getcwd']()
         if not cwd: return ''
 
-        proc = Popen(['svn', 'info'], stdout=PIPE, stderr=PIPE)
+        proc = Popen(['svn', 'info', cwd], stdout=PIPE, stderr=PIPE)
         out, err = [item.decode('utf-8') for item in proc.communicate()]
         return out.splitlines(), err.splitlines()
 
@@ -45,7 +45,7 @@ class SvnStatusSegment(Segment):
         cwd = segment_info['getcwd']()
         if not cwd: return ''
 
-        proc = Popen(['svn', 'status'], stdout=PIPE, stderr=PIPE)
+        proc = Popen(['svn', 'status', cwd], stdout=PIPE, stderr=PIPE)
         out, err = [item.decode('utf-8') for item in proc.communicate()]
         return out.splitlines(), err.splitlines()
 

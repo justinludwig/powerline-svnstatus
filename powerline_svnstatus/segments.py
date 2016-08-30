@@ -12,6 +12,15 @@ class SvnStatusSegment(Segment):
     default_branch_re = '/(trunk)(?:/|$)|/(?:tags|branch(?:es)?)/([^/]+)'
 
     '''
+    Creates environment settings with base locale to use for svn info/status.
+    '''
+    def make_env(self, segment_info):
+        myenv = segment_info['environ'].copy()
+        myenv['LANG'] = 'C'
+        myenv['LC_MESSAGES'] = 'C'
+        return myenv
+
+    '''
     Executes `svn info` in the current working directory,
     and returns the lines from stdout and stderr.
     '''
@@ -19,7 +28,7 @@ class SvnStatusSegment(Segment):
         cwd = segment_info['getcwd']()
         if not cwd: return ''
 
-        proc = Popen(['svn', 'info', cwd], stdout=PIPE, stderr=PIPE)
+        proc = Popen(['svn', 'info', cwd], stdout=PIPE, stderr=PIPE, env=self.make_env(segment_info))
         out, err = [item.decode('utf-8') for item in proc.communicate()]
         return out.splitlines(), err.splitlines()
 
@@ -45,7 +54,7 @@ class SvnStatusSegment(Segment):
         cwd = segment_info['getcwd']()
         if not cwd: return ''
 
-        proc = Popen(['svn', 'status', '--ignore-externals', cwd], stdout=PIPE, stderr=PIPE)
+        proc = Popen(['svn', 'status', '--ignore-externals', cwd], stdout=PIPE, stderr=PIPE, env=self.make_env(segment_info))
         out, err = [item.decode('utf-8') for item in proc.communicate()]
         return out.splitlines(), err.splitlines()
 

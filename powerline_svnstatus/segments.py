@@ -54,7 +54,7 @@ class SvnStatusSegment(Segment):
         cwd = segment_info['getcwd']()
         if not cwd: return ''
 
-        proc = Popen(['svn', 'status', '--ignore-externals', cwd], stdout=PIPE, stderr=PIPE, env=self.make_env(segment_info))
+        proc = Popen(['svn', 'status', cwd], stdout=PIPE, stderr=PIPE, env=self.make_env(segment_info))
         out, err = [item.decode('utf-8') for item in proc.communicate()]
         return out.splitlines(), err.splitlines()
 
@@ -65,7 +65,14 @@ class SvnStatusSegment(Segment):
     (like {'A+': 2, '!C': 1, 'D': 3}).
     '''
     def parse_status(self, lines):
-        return Counter([re.sub(r' +', '', x[0:7]) for x in lines if not x.startswith('       ')])
+        return Counter([re.sub(r' +', '', x[0:7]) for x in lines if not re.match(r'       |$|Performing', x)])
+
+    '''
+    Returns true if the parsed status chars from `svn status` indicate
+    at least one dirty file.
+    '''
+    def is_dirty(self, counts):
+        return True if [x for x in counts if not x[0] in ['S', 'X']] else False
 
     '''
     Returns a segment dictionary, given a status char, count pair ('A+', 2).
@@ -104,11 +111,14 @@ class SvnStatusSegment(Segment):
         if err: return
         if not out: return segments
 
-        # if `svn status` returns something, display the branch as dirty
-        segments[0]['highlight_groups'] = ['svnstatus_dirty', 'branch_dirty', 'svnstatus', 'branch']
+        counts = self.parse_status(out)
+        if not counts: return segments
+
+        # if `svn status` returned dirty results, display the branch as dirty
+        if self.is_dirty(counts):
+            segments[0]['highlight_groups'] = ['svnstatus_dirty', 'branch_dirty', 'svnstatus', 'branch']
 
         # add the count of each status type as a separate segment
-        counts = self.parse_status(out)
         return segments + [self.build_status_segment(x) for x in counts.items()]
 
 svnstatus = with_docstring(SvnStatusSegment(),

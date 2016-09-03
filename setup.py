@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name         = 'powerline-svnstatus',
     description  = 'A Powerline segment for showing the status of a Subversion working directory',
-    version      = '0.1',
+    version      = '0.2',
     keywords     = 'powerline svn status prompt',
     license      = 'MIT',
     author       = 'Justin Ludwig',

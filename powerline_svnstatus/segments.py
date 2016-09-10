@@ -65,7 +65,7 @@ class SvnStatusSegment(Segment):
     (like {'A+': 2, '!C': 1, 'D': 3}).
     '''
     def parse_status(self, lines):
-        return Counter([re.sub(r' +', '', x[0:7]) for x in lines if not re.match(r'       |$|Performing', x)])
+        return Counter([re.sub(r' +', '', x[0:7]) for x in lines if not re.match(r'       |$|Performing|^Summary of conflicts|^  Text conflicts', x)])
 
     '''
     Returns true if the parsed status chars from `svn status` indicate

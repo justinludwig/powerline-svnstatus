@@ -97,7 +97,10 @@ class SvnStatusSegment(Segment):
         segments = []
 
         out, err = self.execute_info(pl, segment_info)
-        if err: return
+        if err:
+            for e in err:
+                pl.error(e)
+            return
 
         # if `svn info` doesn't error, display segment for branch
         branch = self.parse_info(out, branch_re)
@@ -108,7 +111,10 @@ class SvnStatusSegment(Segment):
         })
 
         out, err = self.execute_status(pl, segment_info)
-        if err: return
+        if err:
+            for e in err:
+                pl.error(e)
+            return
         if not out: return segments
 
         counts = self.parse_status(out)

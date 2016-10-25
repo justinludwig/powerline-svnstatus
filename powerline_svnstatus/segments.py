@@ -99,7 +99,8 @@ class SvnStatusSegment(Segment):
         out, err = self.execute_info(pl, segment_info)
         if err:
             for e in err:
-                pl.error(e)
+                if not e.endswith('is not a working copy'):
+                    pl.error(e)
             return
 
         # if `svn info` doesn't error, display segment for branch
@@ -113,7 +114,8 @@ class SvnStatusSegment(Segment):
         out, err = self.execute_status(pl, segment_info)
         if err:
             for e in err:
-                pl.error(e)
+                if not e.endswith('is not a working copy'):
+                    pl.error(e)
             return
         if not out: return segments
 

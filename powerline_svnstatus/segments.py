@@ -9,7 +9,9 @@ import re
 @requires_segment_info
 class SvnStatusSegment(Segment):
 
+    default_branch_format = u'\ue0a0 %s'
     default_branch_re = '/(trunk)(?:/|$)|/(?:tags|branch(?:es)?)/([^/]+)'
+    default_line_start = 'URL: '
 
     '''
     Creates environment settings with base locale to use for svn info/status.
@@ -36,13 +38,16 @@ class SvnStatusSegment(Segment):
     Searches `svn info` text for "URL: https://example.com/svn/foo/trunk" line;
     then matches `branch_re` against that line,
     and returns all matches as a single string (like 'foo/trunk' or 'ticket123').
+    When `line_start` is anything other than the default (`None`), a line starting
+    with that string is selected and `branch_re` is used on that line.
     '''
-    def parse_info(self, lines, branch_re):
-        url = next((x for x in lines if x.startswith('URL: ')), '')
+    def parse_info(self, lines, branch_re, line_start):
+        if not line_start: line_start = self.default_line_start
+        url = next((x for x in lines if x.startswith(line_start)), '')
         if not url: return ''
 
         if not branch_re: branch_re = self.default_branch_re
-        match = re.search(branch_re, re.sub(r'^URL: ', '', url))
+        match = re.search(branch_re, url[len(line_start):])
 
         return ''.join(match.groups('')) if match else ''
 
@@ -93,7 +98,8 @@ class SvnStatusSegment(Segment):
     '''
     Segment entry point; returns a list of segment dictionaries.
     '''
-    def __call__(self, pl, segment_info, branch_re=None):
+    def __call__(self, pl, segment_info, branch_format=None, branch_re=None,
+                 line_start=None):
         segments = []
 
         out, err = self.execute_info(pl, segment_info)
@@ -104,9 +110,11 @@ class SvnStatusSegment(Segment):
             return
 
         # if `svn info` doesn't error, display segment for branch
-        branch = self.parse_info(out, branch_re)
+        if not branch_format:
+            branch_format = self.default_branch_format
+        branch = self.parse_info(out, branch_re, line_start)
         segments.append({
-            'contents': u'\ue0a0 %s' % branch,
+            'contents': branch_format % branch,
             'highlight_groups': ['svnstatus_clean', 'branch_clean', 'svnstatus', 'branch'],
             'draw_inner_divider': True
         })
@@ -137,11 +145,23 @@ and additional segments for each type of modification
 (ie A for Addded, C for Conflicted, D for Deleted, etc)
 with the count of files which have that modification type.
 
+:param str branch_format:
+    Format string for segment content. One string argument (`%%s`) is
+    substituted by the matched groups of below `branch_re`. Defaults to
+    a branch symbol followed by that string.
+
 :param str branch_re:
     Regex to use to convert URL from `svn info` into short branch name.
-    The capturing groups of the regex are concatonated together
+    The capturing groups of the regex are concatenated together
     to create the branch name. The default regex is this:
     '/(trunk)(?:/|$)|/(?:tags|branch(?:es)?)/([^/]+)'.
+
+:param str line_start:
+    String that line of interest from `svn info` output should start
+    with. The above regular expression is used on this particular line.
+    By default, this is 'URL: ', so that the URL of the repository is
+    targeted. The line of output minus this prefix is fed to the
+    `branch_re` regular expression.
 
 Highlight groups used: ``svnstatus_clean``, ``svnstatus_dirty``, ``svnstatus_unknown``, ``svnstatus``. Also will use per-modification-type groups if available, such as ``svnstatus_A``, ``svnstatus_C``, ``svnstatus_D``, etc.
 ''')

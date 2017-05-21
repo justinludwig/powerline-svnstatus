@@ -42,6 +42,26 @@ You can use the `branch_re` argument in this segment's configuration to customiz
             },
 ```
 
+By default, the segment will display a branch symbol () followed by the matched groups from the regular expression. You can change this using the `branch_format` option. This is expected to be a format string, in which `%s` is replaced by the matched groups from the `banch_re` regular expression. You can override the default ` %s` in the same manner shown above.
+
+Finally, if you would like to display information coming from a different line of `svn info` output than the URL, you can change the line to extract by specifying the `line_start` option. The `branch_re` regular expression is run on the line of `svn info` output that starts with this string, after the string has been removed from it. It defaults to `URL: `, as you might expect. Thus, if one line of the `svn info` would be `Repository Root: https://repo.example.com/svn/foo`, you could specify that you are interested in it by setting `"line_start": "Repository Root: "`. The `branch_re` expression would then be run on `https://repo.example.com/svn/foo`.
+
+You can use the above options to display the current revision in the segment, instead of a branch, as follows:
+
+```json
+            {
+                "function": "powerline_svnstatus.svnstatus",
+                "args": {
+                    "branch_format": "r%s",
+                    "branch_re": "(\\d+)",
+                    "line_start": "Revision: "
+                },
+                "priority": 40
+            },
+```
+
+As you can see, this specifies that we are interested in the revision (`line_start`), parses out the revision number (`branch_re`) and finally displays it prefixed with a lowercase r (`branch_format`). Your segment could now display `r42`, for example.
+
 Colorization
 ------------
 

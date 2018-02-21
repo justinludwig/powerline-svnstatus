@@ -18,6 +18,7 @@ class SvnStatusSegment(Segment):
     '''
     def make_env(self, segment_info):
         myenv = segment_info['environ'].copy()
+        myenv['PS1'] = ''
         myenv['LANG'] = 'C'
         myenv['LC_MESSAGES'] = 'C'
         return myenv
